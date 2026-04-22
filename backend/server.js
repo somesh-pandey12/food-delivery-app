@@ -6,23 +6,19 @@ const userRoutes = require('./routes/userRoutes');
 
 dotenv.config();
 
-// Connect to database
 connectDB();
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Routes
 app.use('/api/user', userRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
-// Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

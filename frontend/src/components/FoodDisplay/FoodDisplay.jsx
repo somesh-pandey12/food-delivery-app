@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { StoreContext } from '../../context/StoreContext'
-import FoodItem from '../FoodItem/FoodItem'
+import FoodItem from "./FoodItem";
 
 const FoodDisplay = () => {
     // Screenshot mein yahan 'StoreContext' likha tha, use 'StoreContext' se sahi kiya gaya hai

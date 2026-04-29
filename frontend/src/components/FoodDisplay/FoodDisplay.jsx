@@ -3,7 +3,6 @@ import { StoreContext } from '../../context/StoreContext'
 import FoodItem from "./FoodItem";
 
 const FoodDisplay = () => {
-    // Screenshot mein yahan 'StoreContext' likha tha, use 'StoreContext' se sahi kiya gaya hai
     const { food_list } = useContext(StoreContext);
 
     return (

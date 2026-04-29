@@ -1,27 +1,36 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const connectDB = require('./config/db');
-const userRoutes = require('./routes/userRoutes');
-const foodRoutes = require('./routes/foodRoutes');
+import 'dotenv/config'
+import express from "express"
+import cors from "cors"
+import dotenv from "dotenv"
+import { connectDB } from "./config/db.js"
+import userRouter from "./routes/userRoute.js"
+import foodRouter from "./routes/foodRoute.js"
 
-dotenv.config();
+// Config
+dotenv.config()
 
-connectDB();
+// App
+const app = express()
+const PORT = process.env.PORT || 4000
 
-const app = express();
+// Middleware
+app.use(cors())
+app.use(express.json())
+app.use("/images", express.static("uploads"))
 
-app.use(cors());
-app.use(express.json());
-app.use('/api/food', foodRoutes);
+// DB Connection
+connectDB()
 
-app.use('/api/user', userRoutes);
+// Routes
+app.use("/api/user", userRouter)
+app.use("/api/food", foodRouter)
 
-app.get('/', (req, res) => {
-    res.send('API is running...');
-});
+// Test Route
+app.get("/", (req, res) => {
+  res.send("API is running...")
+})
 
-const PORT = process.env.PORT || 5000;
+// Server Start
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+  console.log(`Server running on http://localhost:${PORT}`)
+})

@@ -1,13 +1,13 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
+import 'dotenv/config'; // Ye line zaroor add karein agar server.js mein nahi hai
 
-const connectDB = async () => {
+export const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGO_URI);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        // process.env.MONGODB_URI ka use karein
+        await mongoose.connect(`${process.env.MONGODB_URI}`);
+        console.log("DB Connected Successfully");
     } catch (error) {
-        console.error(`Error: ${error.message}`);
-        process.exit(1);
+        console.log("DB Connection Error: ", error.message);
+        process.exit(1); // Error aane par process band kar dein
     }
-};
-
-module.exports = connectDB;
+}

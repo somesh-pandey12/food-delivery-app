@@ -1,25 +1,36 @@
-const Food = require('../models/foodModel');
+import foodModel from "../models/foodModel.js";
+import fs from 'fs';
 
-// Saare food items ko fetch karein [cite: 21]
-const getFoods = async (req, res) => {
-    try {
-        const foods = await Food.find({});
-        res.json(foods);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-// Naya food item add karein (Admin ke liye)
+// Food Item Add karne ka logic
 const addFood = async (req, res) => {
-    const { name, description, price, image, category } = req.body;
+    let image_filename = `${req.file.filename}`;
+
+    const food = new foodModel({
+        name: req.body.name,
+        description: req.body.description,
+        price: req.body.price,
+        category: req.body.category,
+        image: image_filename
+    });
+
     try {
-        const food = new Food({ name, description, price, image, category });
         await food.save();
-        res.status(201).json(food);
+        res.json({ success: true, message: "Food Added Successfully" });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.log(error);
+        res.json({ success: false, message: "Error adding food" });
     }
 };
 
-module.exports = { getFoods, addFood };
+// Saare Food Items ki list dikhane ke liye
+const listFood = async (req, res) => {
+    try {
+        const foods = await foodModel.find({});
+        res.json({ success: true, data: foods });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "Error fetching food list" });
+    }
+};
+
+export { addFood, listFood };

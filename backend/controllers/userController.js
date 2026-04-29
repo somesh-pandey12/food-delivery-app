@@ -1,41 +1,74 @@
-const User = require('../models/userModel');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+import userModel from "../models/userModel.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import validator from "validator";
 
-// 1. Register User (Signup) 
+// Token banane ka function
+const createToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET);
+};
+
+// Route: User Register karna
 const registerUser = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, password, email } = req.body;
     try {
-        const userExists = await User.findOne({ email });
-        if (userExists) return res.status(400).json({ message: "User already exists" });
+        // Check karna ki user pehle se exist toh nahi karta
+        const exists = await userModel.findOne({ email });
+        if (exists) {
+            return res.json({ success: false, message: "User already exists" });
+        }
 
-        // Password hashing [cite: 18]
+        // Email format aur strong password check karna [cite: 55]
+        if (!validator.isEmail(email)) {
+            return res.json({ success: false, message: "Please enter a valid email" });
+        }
+        if (password.length < 8) {
+            return res.json({ success: false, message: "Please enter a strong password" });
+        }
+
+        // Password hashing (Security ke liye) [cite: 18]
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const user = await User.create({ name, email, password: hashedPassword });
-        res.status(201).json({ message: "User registered successfully" });
+        const newUser = new userModel({
+            name: name,
+            email: email,
+            password: hashedPassword
+        });
+
+        const user = await newUser.save();
+        const token = createToken(user._id);
+        res.json({ success: true, token });
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.log(error);
+        res.json({ success: false, message: "Error" });
     }
 };
 
-// 2. Login User 
+// Route: User Login karna
 const loginUser = async (req, res) => {
     const { email, password } = req.body;
     try {
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ message: "Invalid credentials" });
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            return res.json({ success: false, message: "User doesn't exist" });
+        }
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
-        // JWT Token generate karein 
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-        res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+        if (!isMatch) {
+            return res.json({ success: false, message: "Invalid credentials" });
+        }
+
+        const token = createToken(user._id);
+        res.json({ success: true, token });
+
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.log(error);
+        res.json({ success: false, message: "Error" });
     }
 };
 
-module.exports = { registerUser, loginUser };
+export { loginUser, registerUser };

@@ -1,11 +1,13 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    address: { type: String, default: "" },
-    role: { type: String, default: "customer" } // customer ya admin 
-}, { timestamps: true });
+    cartData: { type: Object, default: {} }
+}, { minimize: false });
 
-module.exports = mongoose.model('User', userSchema);
+// Pehle check karein ki model pehle se bana toh nahi hai, nahi toh naya banayein
+const userModel = mongoose.models.user || mongoose.model("user", userSchema);
+
+export default userModel; // <--- Yeh line sabse zaroori hai
